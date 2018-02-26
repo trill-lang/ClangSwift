@@ -275,6 +275,11 @@ public class TranslationUnit {
     return (0..<toks.count).flatMap { convertCursor(cursors[$0]) }
   }
 
+  /// Returns the underlying CXTranslationUnit value.
+  public func asClang() -> CXTranslationUnit {
+    return self.clang
+  }
+
   deinit {
     clang_disposeTranslationUnit(clang)
   }
