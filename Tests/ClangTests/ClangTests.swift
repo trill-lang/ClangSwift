@@ -16,9 +16,21 @@ class ClangTests: XCTestCase {
     }
   }
 
+  func testDiagnostic() {
+    do {
+      let src = "void main() {int a = \"\"; return 0}"
+      let unit = try TranslationUnit(clangSource: src, language: .c)
+      let diagnostics = unit.diagnostics
+      XCTAssertEqual(diagnostics.count, 4)
+    } catch {
+      XCTFail("\(error)")
+    }
+  }
+
   static var allTests : [(String, (ClangTests) -> () throws -> Void)] {
     return [
       ("testInitUsingStringAsSource", testInitUsingStringAsSource),
+      ("testDiagnostic", testDiagnostic)
     ]
   }
 }

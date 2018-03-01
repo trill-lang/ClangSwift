@@ -117,3 +117,66 @@ public struct DiagnosticDisplayOptions: OptionSet {
   public static let categoryName = DiagnosticDisplayOptions(rawValue:
     CXDiagnostic_DisplayCategoryName.rawValue)
 }
+
+/// Encapusulates necessary information for appyling a fix it.
+public struct FixIt {
+  /// A string containing text that should replace the source code indicated by
+  /// `replacementRange`.
+  let fixit: String
+
+  /// A source range that will be replaced by the content of the `fixit`.
+  let replacementRange: SourceRange
+}
+
+/// A single diagnostic, containing the diagnostic's severity, location, text,
+/// source ranges, and fix-it hints.
+public class Diagnostic: CustomStringConvertible {
+  let clang: CXDiagnostic
+
+  init(clang: CXDiagnostic) {
+    self.clang = clang
+  }
+
+  /// Severity of the diagnostic.
+  public var severity: DiagnosticSeverity {
+    return DiagnosticSeverity(
+      clang: clang_getDiagnosticSeverity(self.clang)
+    )
+  }
+
+  /// Diagnostic spelling.
+  public var description: String {
+    return clang_getDiagnosticSpelling(self.clang).asSwift()
+  }
+
+  /// Source ranges associated with the diagnostic.
+  public var ranges: [SourceRange] {
+    let count = clang_getDiagnosticNumRanges(clang)
+    return (0..<count).map { idx in
+      SourceRange(clang: clang_getDiagnosticRange(clang, idx))
+    }
+  }
+
+  /// Available fixits for the diagnostic.
+  public var fixits: [FixIt] {
+    let count = clang_getDiagnosticNumFixIts(clang)
+    return (0..<count).map { idx in
+      var replacementRange = CXSourceRange()
+      let fixit =
+        clang_getDiagnosticFixIt(clang, idx, &replacementRange).asSwift()
+      return FixIt(fixit: fixit,
+                   replacementRange: SourceRange(clang: replacementRange))
+    }
+  }
+
+  /// Format the given diagnostic in a manner that is suitable for display.
+  /// - param options: A set of options that control the diagnostic display.
+  /// - returns: string containing for formatted diagnostic
+  public func format(options: DiagnosticDisplayOptions) -> String {
+    return clang_formatDiagnostic(self.clang, options.rawValue).asSwift()
+  }
+
+  deinit {
+    clang_disposeDiagnostic(self.clang)
+  }
+}

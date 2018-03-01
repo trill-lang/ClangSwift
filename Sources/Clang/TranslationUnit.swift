@@ -203,6 +203,17 @@ public class TranslationUnit {
     return convertCursor(clang_getTranslationUnitCursor(clang))!
   }
 
+  /// Retrieves diagnostics attached with the given translation unit.
+  public var diagnostics: [Diagnostic] {
+    let diagnosticSet = clang_getDiagnosticSetFromTU(self.clang)
+    defer { clang_disposeDiagnosticSet(diagnosticSet) }
+
+    let count = clang_getNumDiagnosticsInSet(diagnosticSet)
+    return (0..<count).map { idx in
+      Diagnostic(clang:
+        clang_getDiagnosticInSet(diagnosticSet, idx))
+    }
+  }
 
   /// Visits each of the children of this translation unit, calling the
   /// provided callback for each child.
