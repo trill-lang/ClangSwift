@@ -27,10 +27,33 @@ class ClangTests: XCTestCase {
     }
   }
 
+  func testUnsavedFile() {
+    let unsavedFile = UnsavedFile(filename: "a.c", contents: "void f(void);")
+
+    XCTAssertEqual(unsavedFile.filename, "a.c")
+    XCTAssertTrue(strcmp(unsavedFile.clang.Filename, "a.c") == 0)
+
+    XCTAssertEqual(unsavedFile.contents, "void f(void);")
+    XCTAssertTrue(strcmp(unsavedFile.clang.Contents, "void f(void);") == 0)
+    XCTAssertEqual(unsavedFile.clang.Length, 13)
+
+
+    unsavedFile.filename = "b.c"
+    XCTAssertEqual(unsavedFile.filename, "b.c")
+    XCTAssertTrue(strcmp(unsavedFile.clang.Filename, "b.c") == 0)
+
+    unsavedFile.contents = "int add(int, int);"
+    XCTAssertEqual(unsavedFile.contents, "int add(int, int);")
+    XCTAssertTrue(strcmp(unsavedFile.clang.Contents, "int add(int, int);") == 0)
+    XCTAssertEqual(unsavedFile.clang.Length, 18)
+  }
+
+
   static var allTests : [(String, (ClangTests) -> () throws -> Void)] {
     return [
       ("testInitUsingStringAsSource", testInitUsingStringAsSource),
-      ("testDiagnostic", testDiagnostic)
+      ("testDiagnostic", testDiagnostic),
+      ("testUnsavedFile", testUnsavedFile),
     ]
   }
 }
