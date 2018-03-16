@@ -13,6 +13,11 @@ public struct FunctionDecl: ClangCursorBacked {
   init(clang: CXCursor) {
     self.clang = clang
   }
+
+  /// Retrieve the number of arguments of the function.
+  public var numArguments: Int {
+    return Int(clang_Cursor_getNumArguments(clang))
+  }
   
   /// Retrieve the argument cursor of a function or method.
   /// The argument cursor can be determined for calls as well as for
@@ -24,6 +29,11 @@ public struct FunctionDecl: ClangCursorBacked {
   /// Retrieve the return type of the function.
   public var resultType: CType? {
     return convertType(clang_getCursorResultType(clang))
+  }
+
+  /// Tells if the function delclaration is inlined.
+  public var isInlined: Bool {
+    return clang_Cursor_isFunctionInlined(clang) != 0
   }
 }
 
