@@ -15,7 +15,7 @@ public struct FunctionDecl: ClangCursorBacked {
   }
 
   /// Retrieve the number of arguments of the function.
-  public var numArguments: Int {
+  public var argumentCount: Int {
     return Int(clang_Cursor_getNumArguments(clang))
   }
   
