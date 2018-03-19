@@ -31,7 +31,7 @@ public struct FunctionDecl: ClangCursorBacked {
     return convertType(clang_getCursorResultType(clang))
   }
 
-  /// Tells if the function delclaration is inlined.
+  /// Tells if the function declaration is inlined.
   public var isInlined: Bool {
     return clang_Cursor_isFunctionInlined(clang) != 0
   }
