@@ -79,7 +79,36 @@ func convertToken(_ clang: CXToken) -> Token {
 
 public struct SourceLocation {
   let clang: CXSourceLocation
-  
+
+  /// Creates a SourceLocation.
+  /// - parameter clang: A CXSourceLocation.
+  init(clang: CXSourceLocation) {
+    self.clang = clang
+  }
+
+  /// Creates a source location associated with a given file/line/column
+  /// in a particular translation unit
+  /// - parameters:
+  ///   - tu: The translation unit associated with the location to extract.
+  ///   - file: Source file.
+  ///   - line: The line number in the source file.
+  ///   - column: The column number in the source file.
+  init(tu: TranslationUnit, file: File, line: Int, column: Int) {
+    self.clang =
+      clang_getLocation(tu.clang, file.clang, UInt32(line), UInt32(column))
+  }
+
+  /// Creates a source location associated with a given character offset
+  /// in a particular translation unit
+  /// - parameters:
+  ///   - tu: The translation unit associated with the location to extract.
+  ///   - file: Source file.
+  ///   - offset: character offset in the source file.
+  init(tu: TranslationUnit, file: File, offset: Int) {
+    self.clang =
+      clang_getLocationForOffset(tu.clang, file.clang, UInt32(offset))
+  }
+
   /// Retrieves all file, line, column, and offset attributes of the provided
   /// source location.
   internal var locations: (file: File, line: Int, column: Int, offset: Int) {
@@ -125,6 +154,22 @@ public struct SourceLocation {
 /// Represents a half-open character range in the source code.
 public struct SourceRange {
   let clang: CXSourceRange
+
+  /// Creates a SourceRange.
+  /// - clang: A CXSourceRange.
+  init(clang: CXSourceRange) {
+    self.clang = clang
+  }
+
+  /// Creates a range from two locations.
+  /// - parameters:
+  ///   - start: Location of the start of the range.
+  ///   - end: Location of the end of the range.
+  /// - note: The range is half opened [start..<end]. That means that the end
+  ///     location is not included.
+  public init(start: SourceLocation, end: SourceLocation) {
+    self.clang = clang_getRange(start.clang, end.clang)
+  }
   
   /// Retrieve a source location representing the first character within a
   /// source range.

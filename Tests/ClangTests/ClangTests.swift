@@ -91,12 +91,54 @@ class ClangTests: XCTestCase {
     }
   }
 
+  func testLocationInitFromLineAndColumn() {
+    do {
+      let filename = "input_tests/locations.c"
+      let unit = try TranslationUnit(filename: filename)
+      let file = File(clang: clang_getFile(unit.clang, filename))
+
+      let start = SourceLocation(tu: unit, file: file, line: 2, column: 3)
+      let end = SourceLocation(tu: unit, file: file, line: 4, column: 17)
+      let range = SourceRange(start: start, end: end)
+
+      XCTAssertEqual(
+        unit.tokens(in: range).map { $0.spelling(in: unit) },
+        ["int", "a", "=", "1", ";", "int", "b", "=", "1", ";", "int", "c", "=",
+         "a", "+", "b", ";"]
+      )
+    } catch {
+      XCTFail("\(error)")
+    }
+  }
+
+  func testLocationInitFromOffset() {
+    do {
+      let filename = "input_tests/locations.c"
+      let unit = try TranslationUnit(filename: filename)
+      let file = unit.getFile(withName: unit.spelling)!
+
+      let start = SourceLocation(tu: unit, file: file, offset: 19)
+      let end = SourceLocation(tu: unit, file: file, offset: 59)
+      let range = SourceRange(start: start, end: end)
+
+      XCTAssertEqual(
+        unit.tokens(in: range).map { $0.spelling(in: unit) },
+        ["int", "a", "=", "1", ";", "int", "b", "=", "1", ";", "int", "c", "=",
+         "a", "+", "b", ";"]
+      )
+    } catch {
+      XCTFail("\(error)")
+    }
+  }
+
   static var allTests : [(String, (ClangTests) -> () throws -> Void)] {
     return [
       ("testInitUsingStringAsSource", testInitUsingStringAsSource),
       ("testDiagnostic", testDiagnostic),
       ("testUnsavedFile", testUnsavedFile),
       ("testInitFromASTFile", testInitFromASTFile),
+      ("testLocationInitFromLineAndColumn", testLocationInitFromLineAndColumn),
+      ("testLocationInitFromOffset", testLocationInitFromOffset),
     ]
   }
 }

@@ -270,6 +270,14 @@ public class TranslationUnit {
     return clang_getTranslationUnitSpelling(clang).asSwift()
   }
 
+  /// Retrieve a file handle within the given translation unit.
+  /// - parameter name: The name of the file.
+  /// - returns: The file handle for the named file in the translation unit,
+  ///     or `nil` if the file was not a part of this translation unit.
+  public func getFile(withName name: String) -> File? {
+    return File(clang: clang_getFile(self.clang, name))
+  }
+
   /// Tokenizes the source code described by the given range into raw lexical
   /// tokens.
   /// - parameter range: the source range in which text should be tokenized.
