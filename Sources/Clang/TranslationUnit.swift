@@ -105,6 +105,25 @@ public struct TranslationUnitOptions: OptionSet {
     CXTranslationUnit_KeepGoing.rawValue)
 }
 
+
+/// Flags that control how translation units are saved.
+/// The enumerators in this enumeration type are meant to be bitwise ORed
+/// together to specify which options should be used when saving the translation
+/// unit.
+public struct TranslationUnitSaveOptions: OptionSet {
+  public typealias RawValue = CXSaveTranslationUnit_Flags.RawValue
+  public let rawValue: RawValue
+
+  /// Creates a new TranslationUnitSaveOptions from a raw integer value.
+  public init(rawValue: RawValue) {
+    self.rawValue = rawValue
+  }
+
+  /// Used to indicate that no special saving options are needed.
+  public static let none =
+    TranslationUnitSaveOptions(rawValue: CXSaveTranslationUnit_None.rawValue)
+}
+
 public class TranslationUnit {
   let clang: CXTranslationUnit
 
@@ -348,6 +367,39 @@ public class TranslationUnit {
                                           options.rawValue)))
     if let clangErr = ClangError(clang: err) {
       throw clangErr
+    }
+  }
+
+  /// Returns suitable options for saving the current `translation unit`.
+  ///
+  /// The set of flags returned provide options for `saveTranslationUnit(in:withOption)`
+  /// by default. The returned flag set contains an unspecified set of options
+  /// that save translation units with the most commonly-requested data.
+  public var defaultSaveOptions: TranslationUnitSaveOptions {
+    return TranslationUnitSaveOptions(rawValue: clang_defaultSaveOptions(clang))
+  }
+
+  /// Saves a translation unit into a serialized representation of that
+  /// translation unit on disk.
+  ///
+  /// Any translation unit that was parsed without error can be saved
+  /// into a file. The translation unit can then be deserialized into a
+  /// new `TranslationUnit` with `TranslationUnit(astFilename:index:)` or,
+  /// if it is an incomplete translation unit that corresponds to a
+  /// header, used as a precompiled header when parsing other translation
+  /// units.
+  ///
+  /// - paramaters:
+  ///   - in: Filename where to store the translation unit.
+  ///   - withOptions: Options that affects how the translation unit is saved.
+  ///
+  /// - throws: `ClangSaveError` in case an error occurred.
+  public func saveTranslationUnit(in filename: String,
+                                  withOptions options: TranslationUnitSaveOptions) throws {
+    let err = CXSaveError(
+      UInt32(clang_saveTranslationUnit(self.clang, filename, options.rawValue)))
+    if let clangSaveErr = ClangSaveError(clang: err) {
+      throw clangSaveErr
     }
   }
 
