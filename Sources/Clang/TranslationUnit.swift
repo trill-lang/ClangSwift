@@ -274,7 +274,7 @@ public class TranslationUnit {
   /// - parameter name: The name of the file.
   /// - returns: The file handle for the named file in the translation unit,
   ///     or `nil` if the file was not a part of this translation unit.
-  public func getFile(withName name: String) -> File? {
+  public func getFile(for name: String) -> File? {
     return File(clang: clang_getFile(self.clang, name))
   }
 

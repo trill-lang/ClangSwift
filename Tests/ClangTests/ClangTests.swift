@@ -115,7 +115,7 @@ class ClangTests: XCTestCase {
     do {
       let filename = "input_tests/locations.c"
       let unit = try TranslationUnit(filename: filename)
-      let file = unit.getFile(withName: unit.spelling)!
+      let file = unit.getFile(for: unit.spelling)!
 
       let start = SourceLocation(tu: unit, file: file, offset: 19)
       let end = SourceLocation(tu: unit, file: file, offset: 59)
