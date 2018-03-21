@@ -97,8 +97,10 @@ class ClangTests: XCTestCase {
       let unit = try TranslationUnit(filename: filename)
       let file = File(clang: clang_getFile(unit.clang, filename))
 
-      let start = SourceLocation(tu: unit, file: file, line: 2, column: 3)
-      let end = SourceLocation(tu: unit, file: file, line: 4, column: 17)
+      let start =
+        SourceLocation(translationUnit: unit, file: file, line: 2, column: 3)
+      let end =
+        SourceLocation(translationUnit: unit, file: file, line: 4, column: 17)
       let range = SourceRange(start: start, end: end)
 
       XCTAssertEqual(
@@ -117,8 +119,8 @@ class ClangTests: XCTestCase {
       let unit = try TranslationUnit(filename: filename)
       let file = unit.getFile(for: unit.spelling)!
 
-      let start = SourceLocation(tu: unit, file: file, offset: 19)
-      let end = SourceLocation(tu: unit, file: file, offset: 59)
+      let start = SourceLocation(translationUnit: unit, file: file, offset: 19)
+      let end = SourceLocation(translationUnit: unit, file: file, offset: 59)
       let range = SourceRange(start: start, end: end)
 
       XCTAssertEqual(

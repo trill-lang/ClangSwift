@@ -89,24 +89,26 @@ public struct SourceLocation {
   /// Creates a source location associated with a given file/line/column
   /// in a particular translation unit
   /// - parameters:
-  ///   - tu: The translation unit associated with the location to extract.
+  ///   - translationUnit: The translation unit associated with the location
+  ///       to extract.
   ///   - file: Source file.
   ///   - line: The line number in the source file.
   ///   - column: The column number in the source file.
-  init(tu: TranslationUnit, file: File, line: Int, column: Int) {
-    self.clang =
-      clang_getLocation(tu.clang, file.clang, UInt32(line), UInt32(column))
+  init(translationUnit: TranslationUnit, file: File, line: Int, column: Int) {
+    self.clang = clang_getLocation(
+      translationUnit.clang, file.clang, UInt32(line), UInt32(column))
   }
 
   /// Creates a source location associated with a given character offset
   /// in a particular translation unit
   /// - parameters:
-  ///   - tu: The translation unit associated with the location to extract.
+  ///   - translationUnit: The translation unit associated with the location
+  ///       to extract.
   ///   - file: Source file.
   ///   - offset: character offset in the source file.
-  init(tu: TranslationUnit, file: File, offset: Int) {
-    self.clang =
-      clang_getLocationForOffset(tu.clang, file.clang, UInt32(offset))
+  init(translationUnit: TranslationUnit, file: File, offset: Int) {
+    self.clang = clang_getLocationForOffset(
+      translationUnit.clang, file.clang, UInt32(offset))
   }
 
   /// Retrieves all file, line, column, and offset attributes of the provided
