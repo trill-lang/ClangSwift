@@ -78,3 +78,61 @@ public struct GlobalOptions: OptionSet {
   public static let threadBackgroundPriorityForAll = GlobalOptions(rawValue:
     CXGlobalOpt_ThreadBackgroundPriorityForAll.rawValue)
 }
+
+
+/// Options for used for indexing actions.
+public struct IndexOptFlags: OptionSet {
+  public typealias RawValue = CXIndexOptFlags.RawValue
+  public let rawValue: RawValue
+
+  /// Creates a new IndexOptFlags from a raw integer value.
+  public init(rawValue: RawValue) {
+    self.rawValue = rawValue
+  }
+
+  /// Used to indicate that no special indexing options are needed.
+  public static let none =
+    IndexOptFlags(rawValue: CXIndexOpt_None.rawValue)
+
+  /// Used to indicate that IndexerCallbacks#indexEntityReference should
+  /// be invoked for only one reference of an entity per source file that does
+  /// not also include a declaration/definition of the entity.
+  public static let supressRedundantRefs =
+    IndexOptFlags(rawValue: CXIndexOpt_SuppressRedundantRefs.rawValue)
+
+  /// Function-local symbols should be indexed. If this is not set
+  /// function-local symbols will be ignored.
+  public static let indexFunctionLocalSymbols =
+    IndexOptFlags(rawValue: CXIndexOpt_IndexFunctionLocalSymbols.rawValue)
+
+  /// Implicit function/class template instantiations should be indexed.
+  /// If this is not set, implicit instantiations will be ignored.
+  public static let indexImplicitTemplateInstantiations =
+    IndexOptFlags(rawValue: CXIndexOpt_IndexImplicitTemplateInstantiations.rawValue)
+
+  /// Suppress all compiler warnings when parsing for indexing.
+  public static let supressWarnings =
+    IndexOptFlags(rawValue: CXIndexOpt_SuppressWarnings.rawValue)
+
+  /// Skip a function/method body that was already parsed during an
+  /// indexing session associated with a \c CXIndexAction object.
+  /// Bodies in system headers are always skipped
+  public static let skipParsedBodiesInSession =
+    IndexOptFlags(rawValue: CXIndexOpt_SkipParsedBodiesInSession.rawValue)
+}
+
+/// An indexing action/session, to be applied to one or multiple translation
+/// units.
+public class IndexAction {
+  let clang: CXIndexAction
+
+  /// Initializes an indexion action.
+  /// - parameter index: An Index.
+  public init(index: Index = Index()) {
+    clang = clang_IndexAction_create(index.clang)
+  }
+
+  deinit {
+    clang_IndexAction_dispose(clang)
+  }
+}

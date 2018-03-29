@@ -133,6 +133,30 @@ class ClangTests: XCTestCase {
     }
   }
 
+
+  func testIndexAction() {
+    do {
+      let filename = "input_tests/index-action.c"
+      let unit = try TranslationUnit(filename: filename)
+
+      var indexerCallbacks = IndexerCallbacks()
+      indexerCallbacks.indexDeclaration = { _, declPtr in
+        guard let decl = declPtr?.pointee else {
+          return
+        }
+        if decl.cursor.kind == CXCursor_FunctionDecl  {
+          XCTAssertTrue(["main", "didLaunch"].contains(decl.cursor.description))
+        }
+      }
+
+      unit.indexTranslationUnit(indexAction: IndexAction(),
+                                indexerCallbacks: indexerCallbacks,
+                                options: .supressWarnings)
+    } catch {
+      XCTFail("\(error)")
+    }
+  }
+
   static var allTests : [(String, (ClangTests) -> () throws -> Void)] {
     return [
       ("testInitUsingStringAsSource", testInitUsingStringAsSource),
