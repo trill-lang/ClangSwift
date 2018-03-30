@@ -421,12 +421,12 @@ public class TranslationUnit {
   public func indexTranslationUnit(indexAction: IndexAction,
                                    indexerCallbacks: IndexerCallbacks,
                                    options: IndexOptFlags) {
-    var indexer = indexerCallbacks
     // TODO: throw error when clang_indexTranslationUnit returns a non zero value.
+    let opaque = Unmanaged.passUnretained(indexerCallbacks).toOpaque()
     clang_indexTranslationUnit(indexAction.clang,
-                               nil,
-                               &indexer,
-                               UInt32(MemoryLayout<IndexerCallbacks>.size),
+                               opaque, // Used as data in order capture its callbacks
+                               &indexerCallbacks.clang,
+                               UInt32(MemoryLayout<cclang.IndexerCallbacks>.size),
                                options.rawValue,
                                self.clang)
   }

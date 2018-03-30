@@ -139,19 +139,20 @@ class ClangTests: XCTestCase {
       let filename = "input_tests/index-action.c"
       let unit = try TranslationUnit(filename: filename)
 
-      var indexerCallbacks = IndexerCallbacks()
-      indexerCallbacks.indexDeclaration = { _, declPtr in
-        guard let decl = declPtr?.pointee else {
-          return
-        }
-        if decl.cursor.kind == CXCursor_FunctionDecl  {
-          XCTAssertTrue(["main", "didLaunch"].contains(decl.cursor.description))
+      let indexerCallbacks = Clang.IndexerCallbacks()
+      var functionsFound = Set<String>()
+      indexerCallbacks.indexDeclaration = { decl in
+        if decl.cursor is FunctionDecl  {
+          functionsFound.insert(decl.cursor!.description)
         }
       }
 
       unit.indexTranslationUnit(indexAction: IndexAction(),
                                 indexerCallbacks: indexerCallbacks,
-                                options: .supressWarnings)
+                                options: .none)
+
+      XCTAssertEqual(functionsFound,
+                     Set<String>(arrayLiteral: "main", "didLaunch"))
     } catch {
       XCTFail("\(error)")
     }

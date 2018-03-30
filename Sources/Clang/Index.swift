@@ -136,3 +136,76 @@ public class IndexAction {
     clang_IndexAction_dispose(clang)
   }
 }
+
+/// Represents a declaration.
+public struct IdxDeclInfo {
+  let clang: CXIdxDeclInfo
+
+  /// Attached cursor with the declaration.
+  public var cursor: Cursor? {
+    return convertCursor(clang.cursor)
+  }
+
+  /// Wheter the declaration has been redeclared.
+  public var isRedeclaration: Bool {
+    return clang.isRedeclaration != 0
+  }
+
+  /// Wheter the declaration is a definition.
+  public var isDefinition: Bool {
+    return clang.isDefinition != 0
+  }
+
+  /// Wheter the declaration is a container.
+  public var isContainer: Bool {
+    return clang.isContainer != 0
+  }
+
+  /// Whether the declaration exists in code or was created implicitly
+  /// by the compiler, e.g. implicit Objective-C methods for properties.
+  public var isImplicit: Bool {
+    return clang.isImplicit != 0
+  }
+
+  /// Get location of the declaration.
+  public var loc: SourceLocation {
+    return SourceLocation(clang: clang_indexLoc_getCXSourceLocation(clang.loc))
+  }
+
+  // TODO: entityInfo: UnsafePointer<CXIdxEntityInfo>!
+  // TODO: semanticContainer: UnsafePointer<CXIdxContainerInfo>!
+  // TODO: lexicalContainer: UnsafePointer<CXIdxContainerInfo>!
+  // TODO: declAsContainer: UnsafePointer<CXIdxContainerInfo>!
+  // TODO: attributes: UnsafePointer<UnsafePointer<CXIdxAttrInfo>?>!
+  // TODO: numAttributes: UInt32
+  // TODO: flags: UInt32
+}
+
+/// Closure type used with `IndexerCallbacks`.
+public typealias IndexDeclaration = (IdxDeclInfo) -> Void
+
+/// A group of callbacks used by
+/// `TranslationUnit.indexTranslationUnit(indexAction:indexerCallbacks:options:)`.
+public class IndexerCallbacks {
+  var clang = cclang.IndexerCallbacks()
+
+  // TODO: Implement other possible callbacks in `cclang.IndexerCallbacks`.
+
+  /// Callback called for each declaration.
+  var indexDeclaration: IndexDeclaration? {
+    didSet {
+      if indexDeclaration == nil {
+        clang.indexDeclaration = nil
+        return
+      }
+
+      clang.indexDeclaration = { (opaque, declPtr) in
+        if let decl = declPtr?.pointee {
+          let this =
+            Unmanaged<IndexerCallbacks>.fromOpaque(opaque!).takeUnretainedValue()
+          this.indexDeclaration!(IdxDeclInfo(clang: decl))
+        }
+      }
+    }
+  }
+}
