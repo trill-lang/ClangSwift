@@ -199,11 +199,26 @@ public class IndexerCallbacks {
         return
       }
 
+      // It is assumed that the underlying type of CXClientData (e.g: `opaque` below) is
+      // of type `IndexerCallbacks`.
+      // This means that calls to `clang_indexTranslationUnit()` or `clang_indexSourceFile()`
+      // should take a void pointer to an 'IndexerCallbacks' in the CXClientData argument.
+      // Example:
+      // ```
+      // let opaque = Unmanaged.passUnretained(indexerCallbacks).toOpaque()
+      // clang_indexTranslationUnit(indexAction.clang,
+      //                            opaque, <-- Here
+      //                            &indexerCallbacks.clang,
+      //                            UInt32(MemoryLayout<cclang.IndexerCallbacks>.size),
+      //                            options, tu)
+      // ```
       clang.indexDeclaration = { (opaque, declPtr) in
         if let decl = declPtr?.pointee {
           let this =
             Unmanaged<IndexerCallbacks>.fromOpaque(opaque!).takeUnretainedValue()
-          this.indexDeclaration!(IdxDeclInfo(clang: decl))
+          if let f = this.indexDeclaration {
+            f(IdxDeclInfo(clang: decl))
+          }
         }
       }
     }
