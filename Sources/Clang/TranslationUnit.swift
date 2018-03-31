@@ -420,15 +420,19 @@ public class TranslationUnit {
   /// - Diagnostic callback invocations
   public func indexTranslationUnit(indexAction: IndexAction,
                                    indexerCallbacks: IndexerCallbacks,
-                                   options: IndexOptFlags) {
-    // TODO: throw error when clang_indexTranslationUnit returns a non zero value.
+                                   options: IndexOptFlags) throws {
     let opaque = Unmanaged.passUnretained(indexerCallbacks).toOpaque()
-    clang_indexTranslationUnit(indexAction.clang,
-                               opaque, // Used as data in order capture its callbacks
-                               &indexerCallbacks.clang,
-                               UInt32(MemoryLayout<cclang.IndexerCallbacks>.size),
-                               options.rawValue,
-                               self.clang)
+    let err = CXErrorCode(UInt32(
+      clang_indexTranslationUnit(indexAction.clang,
+                                 opaque, // Used as data in order capture its callbacks
+                                 &indexerCallbacks.clang,
+                                 UInt32(MemoryLayout<cclang.IndexerCallbacks>.size),
+                                 options.rawValue,
+                                 self.clang)))
+
+    if let clangErr = ClangError(clang: err) {
+      throw clangErr
+    }
   }
 
   deinit {

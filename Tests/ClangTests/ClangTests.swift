@@ -147,9 +147,9 @@ class ClangTests: XCTestCase {
         }
       }
 
-      unit.indexTranslationUnit(indexAction: IndexAction(),
-                                indexerCallbacks: indexerCallbacks,
-                                options: .none)
+      try unit.indexTranslationUnit(indexAction: IndexAction(),
+                                    indexerCallbacks: indexerCallbacks,
+                                    options: .none)
 
       XCTAssertEqual(functionsFound,
                      Set<String>(arrayLiteral: "main", "didLaunch"))
