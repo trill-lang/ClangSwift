@@ -189,7 +189,7 @@ public typealias IndexDeclaration = (IdxDeclInfo) -> Void
 public class IndexerCallbacks {
   var clang = cclang.IndexerCallbacks()
 
-  /// Creates an instance of `IndexerCallbacks` with no callbacks.
+  /// Creates an empty instance of `IndexerCallbacks`.
   public init() {}
 
   // TODO: Implement other possible callbacks in `cclang.IndexerCallbacks`.
