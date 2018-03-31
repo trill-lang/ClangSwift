@@ -195,7 +195,7 @@ public class IndexerCallbacks {
   // TODO: Implement other possible callbacks in `cclang.IndexerCallbacks`.
 
   /// Callback called for each declaration.
-  var indexDeclaration: IndexDeclaration? {
+  public var indexDeclaration: IndexDeclaration? {
     didSet {
       if indexDeclaration == nil {
         clang.indexDeclaration = nil
