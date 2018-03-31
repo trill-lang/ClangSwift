@@ -133,7 +133,6 @@ class ClangTests: XCTestCase {
     }
   }
 
-
   func testIndexAction() {
     do {
       let filename = "input_tests/index-action.c"
@@ -157,6 +156,23 @@ class ClangTests: XCTestCase {
       XCTFail("\(error)")
     }
   }
+      
+  func testParsingWithUnsavedFile() {
+    do {
+      let filename = "input_tests/unsaved-file.c"
+      let src = "int main(void) { return 0; }"
+      let unsavedFile = UnsavedFile(filename: filename, contents: src)
+      let unit = try TranslationUnit(filename: filename,
+                                     unsavedFiles: [unsavedFile])
+
+      XCTAssertEqual(
+        unit.tokens(in: unit.cursor.range).map { $0.spelling(in: unit) },
+        ["int", "main", "(", "void", ")", "{", "return", "0", ";", "}"]
+      )
+    } catch {
+      XCTFail("\(error)")
+    }
+  }
 
   static var allTests : [(String, (ClangTests) -> () throws -> Void)] {
     return [
@@ -166,6 +182,8 @@ class ClangTests: XCTestCase {
       ("testInitFromASTFile", testInitFromASTFile),
       ("testLocationInitFromLineAndColumn", testLocationInitFromLineAndColumn),
       ("testLocationInitFromOffset", testLocationInitFromOffset),
+      ("testIndexAction", testIndexAction),
+      ("testParsingWithUnsavedFile", testParsingWithUnsavedFile),
     ]
   }
 }

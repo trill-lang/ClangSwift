@@ -146,13 +146,16 @@ public class TranslationUnit {
   public init(filename: String,
               index: Index = Index(),
               commandLineArgs args: [String] = [],
-              options: TranslationUnitOptions = []) throws {
+              options: TranslationUnitOptions = [],
+              unsavedFiles: [UnsavedFile] = []) throws {
     self.clang = try args.withUnsafeCStringBuffer { argC in
       var unit: CXTranslationUnit?
+      var cxUnsavedFiles = unsavedFiles.map { $0.clang }
       let err = clang_parseTranslationUnit2(index.clang, filename,
                                             argC.baseAddress,
                                             Int32(argC.count),
-                                            nil, 0,
+                                            &cxUnsavedFiles,
+                                            UInt32(cxUnsavedFiles.count),
                                             options.rawValue, &unit)
       if let clangErr = ClangError(clang: err) {
         throw clangErr
