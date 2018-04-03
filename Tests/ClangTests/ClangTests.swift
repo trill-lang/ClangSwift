@@ -186,6 +186,25 @@ class ClangTests: XCTestCase {
     }
   }
 
+  func testIsFromMainFile() {
+    do {
+      let unit = try TranslationUnit(filename: "input_tests/is-from-main-file.c")
+
+      var functions = [Cursor]()
+      unit.visitChildren { cursor in
+        if cursor is FunctionDecl && cursor.range.start.isFromMainFile {
+          functions.append(cursor)
+        }
+        return .recurse
+      }
+
+      XCTAssertEqual(functions.map{$0.description}, ["main"])
+    } catch {
+      XCTFail("\(error)")
+
+    }
+  }
+
   static var allTests : [(String, (ClangTests) -> () throws -> Void)] {
     return [
       ("testInitUsingStringAsSource", testInitUsingStringAsSource),
@@ -196,6 +215,7 @@ class ClangTests: XCTestCase {
       ("testLocationInitFromOffset", testLocationInitFromOffset),
       ("testIndexAction", testIndexAction),
       ("testParsingWithUnsavedFile", testParsingWithUnsavedFile),
+      ("testIsFromMainFile", testIsFromMainFile),
     ]
   }
 }
