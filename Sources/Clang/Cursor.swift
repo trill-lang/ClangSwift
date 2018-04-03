@@ -304,6 +304,62 @@ extension Cursor {
     return Language(clang: clang_getCursorLanguage(asClang()))
   }
 
+  /// Determine whether the declaration pointed to by this cursor
+  // is also a definition of that entity.
+  public var isDefinition: Bool {
+    return clang_isCursorDefinition(asClang()) != 0
+  }
+
+  /// Determine whether the given cursor represents a declaration.
+  public var isDeclaration: Bool {
+    return clang_isDeclaration(asClang().kind) != 0
+  }
+
+  /// Determine whether the given cursor kind represents a simple reference.
+  /// Note that other kinds of cursors (such as expressions) can also refer to
+  /// other cursors. Use clang_getCursorReferenced() to determine whether a
+  /// particular cursor refers to another entity.
+  public var isReference: Bool {
+    return clang_isReference(asClang().kind) != 0
+  }
+
+  /// Determine whether the given cursor represents an expression.
+  public var isExpression: Bool {
+    return clang_isExpression(asClang().kind) != 0
+  }
+
+  /// Determine whether the given cursor represents an attribute.
+  public var isAttribute: Bool {
+    return clang_isAttribute(asClang().kind) != 0
+  }
+
+  /// Determine whether the given cursor has any attributes.
+  public var hasAttributes: Bool {
+    return clang_Cursor_hasAttrs(asClang()) != 0
+  }
+
+  /// Determine whether the given cursor represents a translation unit.
+  public var isTranslationUnit: Bool {
+    return clang_isTranslationUnit(asClang().kind) != 0
+  }
+
+  /// Determine whether the given cursor represents an invalid cursor.
+  public var isInvalid: Bool {
+    return clang_isInvalid(asClang().kind) != 0
+  }
+
+  /// Determine whether the given cursor represents a preprocessing element,
+  /// such as a preprocessor directive or macro instantiation.
+  public var isPreprocessing: Bool {
+    return clang_isPreprocessing(asClang().kind) != 0
+  }
+
+  /// Determine whether the given cursor represents a currently unexposed piece
+  /// of the AST.
+  public var isUnexposed: Bool {
+    return clang_isUnexposed(asClang().kind) != 0
+  }
+
   /// If cursor is a statement declaration tries to evaluate the statement and
   /// if its variable, tries to evaluate its initializer, into its
   /// corresponding type.

@@ -147,6 +147,12 @@ public struct SourceLocation {
   public var file: File {
     return locations.file
   }
+
+  /// Returns if the given source location is in the main file of
+  /// the corresponding translation unit.
+  public var isFromMainFile: Bool {
+    return clang_Location_isFromMainFile(self.clang) != 0
+  }
   
   /// Returns the underlying CXSourceLocation value.
   public func asClang() -> CXSourceLocation {
