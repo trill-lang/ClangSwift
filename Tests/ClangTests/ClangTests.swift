@@ -5,6 +5,18 @@ import XCTest
 @testable import Clang
 
 class ClangTests: XCTestCase {
+  func testInitTranslationUnitUsingArguments() {
+    do {
+      let unit = try TranslationUnit(clangSource: "int main(void) {int a; return 0;}",
+                                     language: .c,
+                                     commandLineArgs: ["-Wall"])
+      XCTAssertEqual(unit.diagnostics.map{$0.description},
+                     ["unused variable \'a\'"])
+    } catch {
+      XCTFail("\(error)")
+    }
+  }
+
   func testInitUsingStringAsSource() {
     do {
       let unit = try TranslationUnit(clangSource: "int main() {}", language: .c)

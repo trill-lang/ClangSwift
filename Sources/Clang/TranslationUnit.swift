@@ -333,7 +333,7 @@ public class TranslationUnit {
       clang_annotateTokens(clang, buf.baseAddress,
                            UInt32(buf.count), cursors)
     }
-    return (0..<toks.count).flatMap { convertCursor(cursors[$0]) }
+    return (0..<toks.count).compactMap { convertCursor(cursors[$0]) }
   }
 
   /// Returns the set of flags that is suitable for reparsing a translation unit.
