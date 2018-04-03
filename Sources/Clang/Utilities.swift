@@ -28,7 +28,7 @@ extension CXString {
   }
 }
 
-extension Collection where Iterator.Element == String, IndexDistance == Int {
+extension Collection where Iterator.Element == String {
 
   func withUnsafeCStringBuffer<Result>(
     _ f: (UnsafeMutableBufferPointer<UnsafePointer<Int8>?>) throws -> Result)

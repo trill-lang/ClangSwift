@@ -92,7 +92,7 @@ public class UnsavedFile {
       return String(cString: filenamePtr)
     }
     set {
-      deallocate(filenamePtr)
+      disposeCStr(filenamePtr)
       filenamePtr = makeCStrFrom(string: newValue)
       clang.Filename = UnsafePointer<CChar>(filenamePtr)
     }
@@ -104,8 +104,15 @@ public class UnsavedFile {
       return String(cString: contentsPtr)
     }
     set {
-      deallocate(contentsPtr)
+      disposeCStr(contentsPtr)
+
       contentsPtr = makeCStrFrom(string: newValue)
+      guard contentsPtr != nil else {
+        clang.Contents = nil
+        clang.Length = 0
+        return
+      }
+
       clang.Contents = UnsafePointer<CChar>(contentsPtr)
       clang.Length = UInt(strlen(contentsPtr))
     }
@@ -126,15 +133,12 @@ public class UnsavedFile {
 
   /// Deallocates a C String.
   /// - Parameter ptr: C String.
-  private func deallocate(_ ptr: UnsafeMutablePointer<CChar>!) {
-    guard let s = ptr else {
-      return
-    }
-    ptr.deallocate(capacity: strlen(s))
+  private func disposeCStr(_ ptr: UnsafeMutablePointer<CChar>?) {
+    ptr?.deallocate()
   }
 
   deinit {
-    deallocate(filenamePtr)
-    deallocate(contentsPtr)
+    disposeCStr(filenamePtr)
+    disposeCStr(contentsPtr)
   }
 }
