@@ -230,7 +230,7 @@ public struct ObjCProtocolDecl: ClangCursorBacked {
 public struct ObjCPropertyDecl: ClangCursorBacked {
   let clang: CXCursor
   
-  var attributes: ObjCPropertyAttributes {
+  public var attributes: ObjCPropertyAttributes {
     return ObjCPropertyAttributes(rawValue:
       clang_Cursor_getObjCPropertyAttributes(clang, 0))
   }
