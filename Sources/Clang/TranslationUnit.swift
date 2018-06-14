@@ -267,6 +267,34 @@ public class TranslationUnit {
   public func visitChildren(_ perCursorCallback: (Cursor) -> ChildVisitResult) {
     cursor.visitChildren(perCursorCallback)
   }
+  
+  /// Visitor invoked for each file in a translation unit (used with
+  /// `visitInclusion(_:)`).
+  ///
+  /// This visitor function will be invoked by `visitInclusion(_:)` for each
+  /// file included (either at the top-level or by \#include directives) within
+  /// a translation unit.  The first argument is the file being included, and
+  /// the second argument provide the inclusion stack.  The array is sorted in
+  /// order of immediate inclusion.  For example, the first element refers to
+  /// the location that included `includedFile`.
+  public typealias InclusionVisitor = (_ includedFile: File, _ inclusionStack: [SourceLocation]) -> Void
+  
+  /// Visit the set of preprocessor inclusions in a translation unit.
+  /// The visitor function is called with the provided data for every included
+  /// file.  This does not include headers included by the PCH file (unless one
+  /// is inspecting the inclusions in the PCH file itself).
+  public func visitInclusion(_ perInclusionCallback: InclusionVisitor) {
+    let visiter: CXInclusionVisitor = { (cxfile, location, depth, data) in
+      let callback = Unmanaged<Box<InclusionVisitor>>.fromOpaque(data!).takeUnretainedValue().value
+      let file = File(clang: cxfile!)
+      let cxstack = UnsafeMutableBufferPointer(start: location!, count: Int(depth))
+      let stack = cxstack.map(SourceLocation.init)
+      callback(file, stack)
+    }
+    let callback = Box(perInclusionCallback)
+    let callbackRef = Unmanaged.passUnretained(callback).toOpaque()
+    clang_getInclusions(clang, visiter, callbackRef)
+  }
 
   /// Get the original translation unit source file name.
   public var spelling: String {

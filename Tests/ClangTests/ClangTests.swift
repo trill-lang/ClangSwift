@@ -204,6 +204,34 @@ class ClangTests: XCTestCase {
 
     }
   }
+  
+  func testVisitInclusion() {
+    func fileName(_ file: File) -> String {
+        return file.name.components(separatedBy: "/").last!
+    }
+    do {
+      let ex1 = expectation(description: "include main")
+      let ex2 = expectation(description: "include stdio")
+      let unit = try TranslationUnit(filename: "input_tests/is-from-main-file.c")
+      let mainFile = unit.cursor.range.start.file
+      unit.visitInclusion { file, stack in
+        if stack.isEmpty {
+          XCTAssert(file == mainFile)
+          ex1.fulfill()
+        } else if stack.count == 1 {
+          XCTAssert(stack[0].file == mainFile)
+          XCTAssert(fileName(file) == "stdio.h")
+          ex2.fulfill()
+        } else {
+          XCTAssert(stack.last!.file == mainFile)
+          XCTAssert(fileName(stack[stack.endIndex - 2].file) == "stdio.h")
+        }
+      }
+      waitForExpectations(timeout: 0)
+    } catch {
+      XCTFail("\(error)")
+    }
+  }
 
   static var allTests : [(String, (ClangTests) -> () throws -> Void)] {
     return [
@@ -216,6 +244,7 @@ class ClangTests: XCTestCase {
       ("testIndexAction", testIndexAction),
       ("testParsingWithUnsavedFile", testParsingWithUnsavedFile),
       ("testIsFromMainFile", testIsFromMainFile),
+      ("testVisitInclusion", testVisitInclusion),
     ]
   }
 }
