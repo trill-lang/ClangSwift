@@ -293,8 +293,9 @@ public class TranslationUnit {
     }
     let cxunit = clang
     withoutActuallyEscaping(perInclusionCallback) { callback in
-      let callbackRef = Unmanaged.passUnretained(Box(callback)).toOpaque()
-      clang_getInclusions(cxunit, visiter, callbackRef)
+      let callbackRef = Unmanaged.passRetained(Box(callback))
+      clang_getInclusions(cxunit, visiter, callbackRef.toOpaque())
+      callbackRef.release()
     }
   }
 
