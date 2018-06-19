@@ -291,9 +291,11 @@ public class TranslationUnit {
       let stack = cxstack.map(SourceLocation.init)
       callback(file, stack)
     }
-    let callback = Box(perInclusionCallback)
-    let callbackRef = Unmanaged.passUnretained(callback).toOpaque()
-    clang_getInclusions(clang, visiter, callbackRef)
+    let cxunit = clang
+    withoutActuallyEscaping(perInclusionCallback) { callback in
+      let callbackRef = Unmanaged.passUnretained(Box(callback)).toOpaque()
+      clang_getInclusions(cxunit, visiter, callbackRef)
+    }
   }
 
   /// Get the original translation unit source file name.
