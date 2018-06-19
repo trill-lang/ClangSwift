@@ -210,24 +210,17 @@ class ClangTests: XCTestCase {
         return file.name.components(separatedBy: "/").last!
     }
     do {
-      let ex1 = expectation(description: "include main")
-      let ex2 = expectation(description: "include stdio")
-      let unit = try TranslationUnit(filename: "input_tests/is-from-main-file.c")
-      let mainFile = unit.cursor.range.start.file
+      let inclusionEx = [
+        ["inclusion.c"],
+        ["inclusion-header.h", "inclusion.c"],
+      ]
+      let unit = try TranslationUnit(filename: "input_tests/inclusion.c")
+      var inclusion: [[String]] = []
       unit.visitInclusion { file, stack in
-        if stack.isEmpty {
-          XCTAssert(file == mainFile)
-          ex1.fulfill()
-        } else if stack.count == 1 {
-          XCTAssert(stack[0].file == mainFile)
-          XCTAssert(fileName(file) == "stdio.h")
-          ex2.fulfill()
-        } else {
-          XCTAssert(stack.last!.file == mainFile)
-          XCTAssert(fileName(stack[stack.endIndex - 2].file) == "stdio.h")
-        }
+        let inc = [fileName(file)] + stack.map { fileName($0.file) }
+        inclusion.append(inc)
       }
-      waitForExpectations(timeout: 0)
+      XCTAssertEqual(inclusion, inclusionEx)
     } catch {
       XCTFail("\(error)")
     }
