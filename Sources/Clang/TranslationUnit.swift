@@ -309,7 +309,8 @@ public class TranslationUnit {
   /// - returns: The file handle for the named file in the translation unit,
   ///     or `nil` if the file was not a part of this translation unit.
   public func getFile(for name: String) -> File? {
-    return File(clang: clang_getFile(self.clang, name))
+    guard let cxfile = clang_getFile(self.clang, name) else { return nil }
+    return File(clang: cxfile)
   }
 
   /// Tokenizes the source code described by the given range into raw lexical
