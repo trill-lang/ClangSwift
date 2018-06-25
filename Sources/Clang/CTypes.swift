@@ -43,10 +43,6 @@ public struct RecordType: ClangTypeBacked {
 
 /// MARK: Standard Types
 
-/// Represents an invalid type (e.g., where no type is available).
-public struct InvalidType: ClangTypeBacked {
-  let clang: CXType
-}
 /// A type whose specific kind is not exposed via this interface.
 public struct UnexposedType: ClangTypeBacked {
   let clang: CXType
@@ -268,7 +264,7 @@ public struct ElaboratedType: ClangTypeBacked {
 /// Converts a CXType to a CType, returning `nil` if it was unsuccessful
 func convertType(_ clang: CXType) -> CType? {
   switch clang.kind {
-  case CXType_Invalid: return InvalidType(clang: clang)
+  case CXType_Invalid: return nil
   case CXType_Unexposed: return UnexposedType(clang: clang)
   case CXType_Void: return VoidType(clang: clang)
   case CXType_Bool: return BoolType(clang: clang)
