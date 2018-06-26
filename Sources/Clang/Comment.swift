@@ -10,16 +10,9 @@ public protocol Comment {
 
 extension Comment {
   /// Retreives all children of this comment.
-  public var children: AnySequence<Comment> {
+  public var children: AnyRandomAccessCollection<Comment?> {
     let count = clang_Comment_getNumChildren(clang)
-    var index: UInt32 = 0
-    return AnySequence<Comment> {
-      return AnyIterator<Comment> {
-        guard index < count else { return nil }
-        defer { index += 1 }
-        return self.child(at: Int(index))
-      }
-    }
+    return AnyRandomAccessCollection(count: Int(count), transform: child)
   }
 
   /// - parameter index: The index of the child you're getting.
@@ -88,15 +81,10 @@ public struct InlineCommandComment: Comment {
   public let clang: CXComment
 
   /// Retrieves all arguments of this inline command.
-  public var arguments: AnySequence<String> {
+  public var arguments: AnyRandomAccessCollection<String> {
     let count = clang_InlineCommandComment_getNumArgs(clang)
-    var index = 0 as UInt32
-    return AnySequence<String> {
-      return AnyIterator<String> {
-        guard index < count else { return nil }
-        defer { index += 1 }
-        return clang_InlineCommandComment_getArgText(self.clang, index).asSwift()
-      }
+    return AnyRandomAccessCollection(count: count) { index in
+      return clang_InlineCommandComment_getArgText(self.clang, index).asSwift()
     }
   }
 }
@@ -125,17 +113,12 @@ public struct HTMLStartTagComment: Comment {
   public let clang: CXComment
 
   /// Retrieves all attributes of this HTML start tag.
-  public var attributes: AnySequence<HTMLAttribute> {
+  public var attributes: AnyRandomAccessCollection<HTMLAttribute> {
     let count = clang_HTMLStartTag_getNumAttrs(clang)
-    var index = 0 as UInt32
-    return AnySequence<HTMLAttribute> {
-      return AnyIterator<HTMLAttribute> {
-        guard index < count else { return nil }
-        defer { index += 1 }
-        let name = clang_HTMLStartTag_getAttrName(self.clang, index).asSwift()
-        let value = clang_HTMLStartTag_getAttrValue(self.clang, index).asSwift()
-        return HTMLAttribute(name: name, value: value)
-      }
+    return AnyRandomAccessCollection(count: count) { index in
+      let name = clang_HTMLStartTag_getAttrName(self.clang, index).asSwift()
+      let value = clang_HTMLStartTag_getAttrValue(self.clang, index).asSwift()
+      return HTMLAttribute(name: name, value: value)
     }
   }
 }
@@ -170,15 +153,10 @@ public struct BlockCommandComment: Comment {
   }
 
   /// Retrieves all attributes of this HTML start tag.
-  public var arguments: AnySequence<String> {
+  public var arguments: AnyRandomAccessCollection<String> {
     let count = clang_BlockCommandComment_getNumArgs(clang)
-    var index = 0 as UInt32
-    return AnySequence<String> {
-      return AnyIterator<String> {
-        guard index < count else { return nil }
-        defer { index += 1 }
-        return clang_BlockCommandComment_getArgText(self.clang, index).asSwift()
-      }
+    return AnyRandomAccessCollection(count: count) { index in
+      return clang_BlockCommandComment_getArgText(self.clang, index).asSwift()
     }
   }
 
@@ -291,15 +269,10 @@ public struct VerbatimBlockCommandComment: Comment {
   }
 
   /// Retrieves all attributes of this HTML start tag.
-  public var arguments: AnySequence<String> {
+  public var arguments: AnyRandomAccessCollection<String> {
     let count = clang_BlockCommandComment_getNumArgs(clang)
-    var index = 0 as UInt32
-    return AnySequence<String> {
-      return AnyIterator<String> {
-        guard index < count else { return nil }
-        defer { index += 1 }
-        return clang_BlockCommandComment_getArgText(self.clang, index).asSwift()
-      }
+    return AnyRandomAccessCollection(count: count) { index in
+      return clang_BlockCommandComment_getArgText(self.clang, index).asSwift()
     }
   }
 

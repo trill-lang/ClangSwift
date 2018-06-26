@@ -277,7 +277,7 @@ public class TranslationUnit {
   /// the second argument provide the inclusion stack.  The array is sorted in
   /// order of immediate inclusion.  For example, the first element refers to
   /// the location that included `includedFile`.
-  public typealias InclusionVisitor = (_ includedFile: File, _ inclusionStack: AnyCollection<SourceLocation>) -> Void
+  public typealias InclusionVisitor = (_ includedFile: File, _ inclusionStack: AnyRandomAccessCollection<SourceLocation>) -> Void
   
   /// Visit the set of preprocessor inclusions in a translation unit.
   /// The visitor function is called with the provided data for every included
@@ -288,7 +288,7 @@ public class TranslationUnit {
       let callback = Unmanaged<Box<InclusionVisitor>>.fromOpaque(data!).takeUnretainedValue().value
       let file = File(clang: cxfile!)
       let cxstack = UnsafeMutableBufferPointer(start: location!, count: Int(depth))
-      let stack = AnyCollection(cxstack.lazy.map(SourceLocation.init))
+      let stack = AnyRandomAccessCollection(cxstack.lazy.map(SourceLocation.init))
       callback(file, stack)
     }
     let cxunit = clang

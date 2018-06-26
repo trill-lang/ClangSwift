@@ -55,3 +55,9 @@ internal class Box<T> {
   public var value: T
   init(_ value: T) { self.value = value }
 }
+
+extension AnyRandomAccessCollection {
+  init<T: Strideable & ExpressibleByIntegerLiteral>(count: T, transform: (T) -> Element) {
+    self.init(stride(from: 0, to: count, by: 1).lazy.map(transform))
+  }
+}
