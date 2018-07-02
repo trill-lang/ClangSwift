@@ -57,7 +57,9 @@ internal class Box<T> {
 }
 
 extension AnyRandomAccessCollection {
-  init<T: Strideable & ExpressibleByIntegerLiteral>(count: T, transform: (T) -> Element) {
-    self.init(stride(from: 0, to: count, by: 1).lazy.map(transform))
+  /// Creates a type-erased collection formed from lazy applications of
+  /// `indexingOperation` to index from zero up to, but not including, `count`.
+  init<T: Strideable & ExpressibleByIntegerLiteral>(count: T, indexingOperation: (T) -> Element) {
+    self.init(stride(from: 0, to: count, by: 1).lazy.map(indexingOperation))
   }
 }

@@ -12,7 +12,7 @@ extension Comment {
   /// Retreives all children of this comment.
   public var children: AnyRandomAccessCollection<Comment?> {
     let count = clang_Comment_getNumChildren(clang)
-    return AnyRandomAccessCollection(count: Int(count), transform: child)
+    return AnyRandomAccessCollection(count: Int(count), indexingOperation: child)
   }
 
   /// - parameter index: The index of the child you're getting.
