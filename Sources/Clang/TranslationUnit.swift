@@ -126,9 +126,11 @@ public struct TranslationUnitSaveOptions: OptionSet {
 
 public class TranslationUnit {
   let clang: CXTranslationUnit
+  private let owned: Bool
 
-  init(clang: CXTranslationUnit) {
+  init(clang: CXTranslationUnit, owned: Bool) {
     self.clang = clang
+    self.owned = owned
   }
 
 
@@ -162,6 +164,7 @@ public class TranslationUnit {
       }
       return unit!
     }
+    self.owned = true
   }
 
   /// Creates a `TranslationUnit` by parsing the source code passed,
@@ -236,6 +239,7 @@ public class TranslationUnit {
     }
     
     self.clang = unit!
+    self.owned = true
   }
 
   /// Retrieve the cursor that represents the given translation unit.
@@ -471,6 +475,8 @@ public class TranslationUnit {
   }
 
   deinit {
-    clang_disposeTranslationUnit(clang)
+    if owned {
+      clang_disposeTranslationUnit(clang)
+    }
   }
 }

@@ -235,6 +235,19 @@ class ClangTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
+  
+  func testDisposeTranslateUnit() {
+    do {
+      let filename = "input_tests/init-ast.c"
+      let unit = try TranslationUnit(filename: filename)
+      let cursor = unit.cursor
+      for _ in 0..<2 {
+        _ = cursor.translationUnit
+      }
+    } catch {
+      XCTFail("\(error)")
+    }
+  }
 
   static var allTests : [(String, (ClangTests) -> () throws -> Void)] {
     return [

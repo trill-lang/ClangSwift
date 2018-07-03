@@ -197,7 +197,7 @@ extension Cursor {
 
   /// Returns the translation unit that a cursor originated from.
   public var translationUnit: TranslationUnit {
-    return TranslationUnit(clang: clang_Cursor_getTranslationUnit(asClang()))
+    return TranslationUnit(clang: clang_Cursor_getTranslationUnit(asClang()), owned: false)
   }
 
   /// Retrieves all the children of the provided cursor.
