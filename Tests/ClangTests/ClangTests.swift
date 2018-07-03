@@ -201,7 +201,6 @@ class ClangTests: XCTestCase {
       XCTAssertEqual(functions.map{$0.description}, ["main"])
     } catch {
       XCTFail("\(error)")
-
     }
   }
   
@@ -225,6 +224,17 @@ class ClangTests: XCTestCase {
       XCTFail("\(error)")
     }
   }
+    
+    func testGetFile() {
+        do {
+            let fileName = "input_tests/init-ast.c"
+            let unit = try TranslationUnit(filename: fileName)
+            XCTAssertNotNil(unit.getFile(for: fileName))
+            XCTAssertNil(unit.getFile(for: "42"))
+        } catch {
+            XCTFail("\(error)")
+        }
+    }
 
   static var allTests : [(String, (ClangTests) -> () throws -> Void)] {
     return [
@@ -238,6 +248,7 @@ class ClangTests: XCTestCase {
       ("testParsingWithUnsavedFile", testParsingWithUnsavedFile),
       ("testIsFromMainFile", testIsFromMainFile),
       ("testVisitInclusion", testVisitInclusion),
+      ("testGetFile", testGetFile),
     ]
   }
 }
