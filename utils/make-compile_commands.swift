@@ -6,19 +6,29 @@ import Foundation
 #elseif os(macOS)
 #endif
 
-/// Runs the specified program at the provided path.
-/// - parameter path: The full path of the executable you
-///                   wish to run.
-/// - parameter args: The arguments you wish to pass to the
-///                   process.
-/// - returns: The standard output of the process, or nil if it was empty.
-func run(_ path: String, args: [String] = []) -> String? {
-  print("Running \(path) \(args.joined(separator: " "))...")
+ /// Runs the specified program at the provided path.
+ ///
+ /// - Parameters:
+ ///   - exec: The full path of the executable binary.
+ ///   - dir: The process working directory. If this is nil, the current directory will be used.
+ ///   - args: The arguments you wish to pass to the process.
+ /// - Returns: The standard output of the process, or nil if it was empty.
+func run(exec: String, at dir: URL? = nil, args: [String] = []) -> String? {
   let pipe = Pipe()
   let process = Process()
-  process.launchPath = path
+
+  process.executableURL = URL(fileURLWithPath: exec)
   process.arguments = args
   process.standardOutput = pipe
+
+  if let dir = dir {
+    print("Running \(dir.path) \(exec) \(args.joined(separator: " "))...")
+    process.currentDirectoryURL = dir
+  } else {
+    print("Running \(args.joined(separator: " "))...")
+  }
+ 
+
   process.launch()
   process.waitUntilExit()
   
@@ -31,7 +41,7 @@ func run(_ path: String, args: [String] = []) -> String? {
 
 /// Finds the location of the provided binary on your system.
 func which(_ name: String) -> String? {
-  return run("/usr/bin/which", args: [name])
+  return run(exec: "/usr/bin/which", args: [name])
 }
 
 extension String: Error {
@@ -51,28 +61,23 @@ func build() throws {
   
   // ${project_root}/.build/build.input_tests url
   let buildURL = projectRoot.appendingPathComponent(".build/build.input_tests", isDirectory: true)
-  //  print(buildURL.path)
-  
   let sourceURL = projectRoot.appendingPathComponent("input_tests", isDirectory: true)
-  //  print(sourceURL.path)
+
+  print("project root \(projectRoot.path)")
+  print("build folder \(buildURL.path)")
+  // print(sourceURL.path)
   
   // make `${projectRoot}/.build.input_tests` folder if it doesn't exist.
   if !FileManager.default.fileExists(atPath: buildURL.path) {
     try FileManager.default.createDirectory(at: buildURL, withIntermediateDirectories: true)
   }
   
-  // run `CMake ../` command at `input_tests/build` folder.
-  //  -S <path-to-source>          = Explicitly specify a source directory.
-  //  -B <path-to-build>           = Explicitly specify a build directory.
+  // get `cmake` command path.
   guard let cmake = which("cmake") else { return }
-  let args: [String] = [
-    "-S", sourceURL.path,
-    "-B", buildURL.path
-  ]
-  
-  // run `cmake -S ${sourcePath} -B {buildPath}` command.
-  _ = run(cmake, args: args)
-  print("\nThe `compile_commands.json` is generated at \(buildURL.path)")
+
+  // run `cd {buildPath}; cmake ${sourcePath}` command.
+  let results = run(exec: cmake, at: buildURL, args: [sourceURL.path])
+  print(results!)
 }
 
 do {

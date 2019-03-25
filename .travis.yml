@@ -10,7 +10,7 @@ matrix:
     - export PATH=/usr/local/opt/llvm/bin:"${PATH}"
     - brew install llvm
     - sudo swift utils/make-pkgconfig.swift
-    - sudo swift utils/make-compile_commands.swift
+    - swift utils/make-compile_commands.swift
     script:
     - swift test
 notifications:
