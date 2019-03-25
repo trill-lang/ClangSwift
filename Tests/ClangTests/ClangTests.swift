@@ -249,20 +249,24 @@ class ClangTests: XCTestCase {
     }
   }
   
-  // URL for a "test_input" folder.
-  var inputTestUrl: URL {
-    let projectRoot = URL(fileURLWithPath: #file).deletingLastPathComponent()
-    return projectRoot.appendingPathComponent("../../input_tests", isDirectory: true).standardized
+  // ${projectRoot}/ folder URL.
+  var projectRoot: URL {
+    return URL(fileURLWithPath: #file).appendingPathComponent("../../../", isDirectory: true).standardized
   }
   
-  // URL for a "test_input/build" folder.
+  // ${projectRoot}/input_tests folder URL.
+  var inputTestUrl: URL {
+    return projectRoot.appendingPathComponent("input_tests", isDirectory: true)
+  }
+  
+  // ${projectRoot}/.build/build.input_tests folder URL
   var buildUrl: URL {
-    return inputTestUrl.appendingPathComponent("build", isDirectory: true)
+    return projectRoot.appendingPathComponent(".build/build.input_tests", isDirectory: true)
   }
   
   func testInitCompilationDB() {
     do {
-      let db = try CompilationDatabase(directory: inputTestUrl.path + "/build")
+      let db = try CompilationDatabase(directory: buildUrl.path)
       XCTAssertNotNil(db)
       XCTAssertEqual(db.compileCommands.count, 7)
       
