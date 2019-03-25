@@ -168,7 +168,7 @@ class ClangTests: XCTestCase {
       XCTFail("\(error)")
     }
   }
-      
+    
   func testParsingWithUnsavedFile() {
     do {
       let filename = "input_tests/unsaved-file.c"
@@ -248,6 +248,101 @@ class ClangTests: XCTestCase {
       XCTFail("\(error)")
     }
   }
+  
+  // URL for a "test_input" folder.
+  var inputTestUrl: URL {
+    let projectRoot = URL(fileURLWithPath: #file).deletingLastPathComponent()
+    return projectRoot.appendingPathComponent("../../input_tests", isDirectory: true).standardized
+  }
+  
+  // URL for a "test_input/build" folder.
+  var buildUrl: URL {
+    return inputTestUrl.appendingPathComponent("build", isDirectory: true)
+  }
+  
+  func testInitCompilationDB() {
+    do {
+      let db = try CompilationDatabase(directory: inputTestUrl.path + "/build")
+      XCTAssertNotNil(db)
+      XCTAssertEqual(db.compileCommands.count, 7)
+      
+    } catch {
+      XCTFail("\(error)")
+    }
+  }
+  
+  func testCompileCommand() {
+    do {
+      // intialize CompilationDatabase.
+      let db = try CompilationDatabase(directory: buildUrl.path)
+      XCTAssertNotNil(db)
+      
+      // test first compileCommand
+      let cmd = db.compileCommands[0]
+      XCTAssertEqual(cmd.directory, buildUrl.path)
+      XCTAssertGreaterThan(cmd.arguments.count, 0)
+      
+      // test all compileCommands
+      let filenames = db.compileCommands.map { URL(fileURLWithPath: $0.filename) }
+      
+      let expectation: Set<URL> = [
+        inputTestUrl.appendingPathComponent("inclusion.c"),
+        inputTestUrl.appendingPathComponent("index-action.c"),
+        inputTestUrl.appendingPathComponent("init-ast.c"),
+        inputTestUrl.appendingPathComponent("is-from-main-file.c"),
+        inputTestUrl.appendingPathComponent("locations.c"),
+        inputTestUrl.appendingPathComponent("reparse.c"),
+        inputTestUrl.appendingPathComponent("unsaved-file.c"),
+      ]
+      XCTAssertEqual(Set(filenames), expectation)
+    } catch {
+      XCTFail("\(error)")
+    }
+  }
+  
+  func testCompileCommandForFile() {
+    do {
+      // intialize CompilationDatabase.
+      let db = try CompilationDatabase(directory: buildUrl.path)
+      XCTAssertNotNil(db)
+      
+      let inclusionFile = inputTestUrl.appendingPathComponent("inclusion.c")
+      
+      // test compileCommand for file `inclusion.c`
+      let cmds = db.compileCommands(forFile: inclusionFile.path)
+      XCTAssertEqual(cmds.count, 1)
+      XCTAssertEqual(cmds[0].filename, inclusionFile.path)
+      XCTAssertEqual(cmds[0].directory, buildUrl.path)
+      XCTAssertGreaterThan(cmds[0].arguments.count, 0)
+    } catch {
+      XCTFail("\(error)")
+    }
+  }
+  
+  func testInitTranslationUnitUsingCompileCommand() {
+    do {
+      // intialize CompilationDatabase.
+      let filename = inputTestUrl.path + "/locations.c"
+      let db = try CompilationDatabase(directory: buildUrl.path)
+      
+      // get first compile command and initialize TranslationUnit using it.
+      let cmd = db.compileCommands(forFile: filename).first!
+      let unit = try TranslationUnit(compileCommand: cmd)
+      
+      // verify.
+      let file = unit.getFile(for: unit.spelling)!
+      let start = SourceLocation(translationUnit: unit, file: file, offset: 19)
+      let end = SourceLocation(translationUnit: unit, file: file, offset: 59)
+      let range = SourceRange(start: start, end: end)
+      
+      XCTAssertEqual(
+        unit.tokens(in: range).map { $0.spelling(in: unit) },
+        ["int", "a", "=", "1", ";", "int", "b", "=", "1", ";", "int", "c", "=",
+         "a", "+", "b", ";"]
+      )
+    } catch {
+    }
+  }
 
   static var allTests : [(String, (ClangTests) -> () throws -> Void)] {
     return [
@@ -262,6 +357,10 @@ class ClangTests: XCTestCase {
       ("testIsFromMainFile", testIsFromMainFile),
       ("testVisitInclusion", testVisitInclusion),
       ("testGetFile", testGetFile),
+      ("testInitCompilationDB", testInitCompilationDB),
+      ("testCompileCommand", testCompileCommand),
+      ("testCompileCommandForFile", testCompileCommandForFile),
+      ("testInitTranslationUnitUsingCompileCommand", testInitTranslationUnitUsingCompileCommand)
     ]
   }
 }
