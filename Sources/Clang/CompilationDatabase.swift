@@ -62,6 +62,13 @@ public class CompilationDatabase {
   public init(directory: String) throws {
     var err = CXCompilationDatabase_NoError
     
+    // check `compile_commands.json` file existence in directory folder.
+    let cmdFile = URL(fileURLWithPath: directory, isDirectory: true)
+        .appendingPathComponent("compile_commands.json").path
+    guard FileManager.default.fileExists(atPath: cmdFile) else {
+        throw CompilationDatabaseError.canNotLoadDatabase
+    }
+    
     // initialize compilation db
     self.db = clang_CompilationDatabase_fromDirectory(directory, &err)
     if let error = CompilationDatabaseError(clang: err) {
