@@ -345,6 +345,7 @@ class ClangTests: XCTestCase {
          "a", "+", "b", ";"]
       )
     } catch {
+        XCTFail("\(error)")
     }
   }
 
