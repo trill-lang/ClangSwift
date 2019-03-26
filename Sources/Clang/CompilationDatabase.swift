@@ -26,13 +26,13 @@ public enum CompilationDatabaseError: Error {
 public struct CompileCommand: Equatable {
   
   // the working directory where the CompileCommand was executed from.
-  let directory: String
+  public let directory: String
   
   // the filename associated with the CompileCommand.
-  let filename: String
+  public let filename: String
   
   // the array of argument value in the compiler invocations.
-  let arguments: [String]
+  public let arguments: [String]
     
   fileprivate init(command: CXCompileCommand) {
     // get directory and filename
