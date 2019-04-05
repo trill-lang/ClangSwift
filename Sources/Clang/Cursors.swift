@@ -1241,6 +1241,11 @@ public struct StaticAssert: ClangCursorBacked {
   let clang: CXCursor
 }
 
+/// A friend declaration.
+public struct FriendDecl: ClangCursorBacked {
+  let clang: CXCursor
+}
+
 /// A code completion overload candidate.
 public struct OverloadCandidate: ClangCursorBacked {
   let clang: CXCursor
@@ -1453,6 +1458,7 @@ func convertCursor(_ clang: CXCursor) -> Cursor? {
   case CXCursor_ModuleImportDecl: return ModuleImportDecl(clang: clang)
   case CXCursor_TypeAliasTemplateDecl: return TypeAliasTemplateDecl(clang: clang)
   case CXCursor_StaticAssert: return StaticAssert(clang: clang)
+  case CXCursor_FriendDecl: return FriendDecl(clang: clang)
   case CXCursor_OverloadCandidate: return OverloadCandidate(clang: clang)
   default: fatalError("invalid CXCursorKind \(clang)")
   }
