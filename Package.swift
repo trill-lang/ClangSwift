@@ -6,7 +6,10 @@ let package = Package(
     products: [
       .library(
         name: "Clang",
-        targets: ["Clang"])
+        targets: ["Clang"]),
+      .library(name: "ClangStatic",
+               type: .static,
+               targets: ["Clang"])
     ],
     dependencies: [ ],
     targets: [
